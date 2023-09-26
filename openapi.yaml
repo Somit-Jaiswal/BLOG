@@ -1,0 +1,571 @@
+openapi: 3.0.3
+info:
+  title: Glimpse - OpenAPI 3.0
+  description: This is a social media blogging site.
+    <h2> ER Diagram </h2> <img src = "https://drive.google.com/uc?id=1cfEShI7LsVCGhtZmujSeHRGLh_n0qwNt"> 
+  contact:
+    email: support@example.com
+  version: 1.0.11
+servers:
+  - url: 127.0.0.1:5000
+paths:
+  /api/login/{username}/{password}:
+    description: Get Authentication token for login
+    get:
+      operationId: "GetAuthTokenByUsernamePassword"
+      description: Operation to get a user details
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: test
+        - in: path
+          name: password
+          required: true
+          schema:
+            type: string
+            example: password
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: user object
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 5
+                  username:
+                    type: string
+                    example: test
+                  email:
+                    type: string
+                    example: test@example.com
+        '404':
+          description: Resource not found.
+        '500':
+          description: Internal Server Error.
+      tags:
+        - Login
+  /api/user_ud/{username}:
+    description: End point to read, update and delete a user resource with username.
+    put:
+      operationId: "UpdateUsername"
+      tags:
+        - User
+      description: Operation to update the user detail
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: test
+        - $ref: '#/components/parameters/Token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: test@example.org
+      responses:
+        '200':
+          description: Successfully updated.
+          content:
+            application/json:
+              schema:
+                title: user object
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 5
+                  username:
+                    type: string
+                    example: test
+                  email:
+                    type: string
+                    example: test@example.org
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+        '404':
+          description: Resource you requested to update not found.
+        '500':
+          description: Internal Server Error.
+    delete:
+      operationId: "DeleteUser"
+      tags:
+        - User
+      description: Operation to delete the user
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: raj
+        - $ref: '#/components/parameters/Token'
+      responses:
+        '200':
+          description: Successfully Deleted.
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+        '404':
+          description: user does not exist.
+        '500':
+          description: Internal Server Error.
+  /api/user:
+    description: End point to create a user.
+    get:
+      operationId: "GetUserDetails"
+      tags:
+        - User
+      parameters:
+        - $ref: '#/components/parameters/Token'
+      description: Operation to get a user details
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: user object
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 5
+                  username:
+                    type: string
+                    example: test
+                  email:
+                    type: string
+                    example: test@example.com
+        '404':
+          description: Resource not found.
+        '500':
+          description: Internal Server Error.
+    post:
+      operationId: "CreateUser"
+      tags:
+        - User
+      description: Operation to create the user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: user object
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: test
+                email:
+                  type: string
+                  example: test@example.org
+                password:
+                  type: string
+                  example: '123456'
+      responses:
+        '201':
+          description: Successfully Created.
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+        '409':
+          description: username already exist.
+        '500':
+          description: Internal Server Error
+  /api/user/{user_id}:
+    description: Get user details by userID
+    get:
+      operationId: "GetUserDetailsUserID"
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the user whose post to retrieve
+        - $ref: '#/components/parameters/Token'
+      description: Operation to get a user details
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: user object
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 5
+                  username:
+                    type: string
+                    example: test
+                  email:
+                    type: string
+                    example: test@example.com
+        '404':
+          description: Resource not found.
+        '500':
+          description: Internal Server Error.
+  /api/post:
+    post:
+      summary: Create a new post
+      tags:
+        - Post
+      parameters:
+        - $ref: '#/components/parameters/Token'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                description:
+                  type: string
+              required:
+                - file
+                - title
+                - description
+      responses:
+        '201':
+          description: Post created successfully
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    put:
+        tags:
+          - Post
+        summary: Update a post by Post ID
+        parameters:
+          - $ref: '#/components/parameters/Token'
+        requestBody:
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  file:
+                    type: string
+                    format: binary
+                  title:
+                    type: string
+                  description:
+                    type: string
+                required:
+                  - file
+                  - title
+                  - description
+                  - id
+        responses:
+          '200':
+            description: The updated post
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Post'
+          '401':
+            description: Unauthorized
+          '404':
+            description: Post not found
+  /api/posts/{user_id}:
+    get:
+      tags:
+        - Post
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the user whose post to retrieve
+        - $ref: '#/components/parameters/Token'
+      summary: Get all posts by User ID
+      responses:
+        '200':
+          description: A list of posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+        '401':
+          description: Unauthorized
+
+  /api/post/{post_id}:
+      get:
+        tags:
+          - Post
+        summary: Get a post by ID
+        parameters:
+          - in: path
+            name: post_id
+            schema:
+              type: integer
+            required: true
+            description: The ID of the post to retrieve
+          - $ref: '#/components/parameters/Token'
+        responses:
+          '200':
+            description: The requested post
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Post'
+          '401':
+            description: Unauthorized
+          '404':
+            description: Post not found
+      delete:
+        summary: Delete a post by ID
+        tags:
+          - Post
+        parameters:
+          - in: path
+            name: post_id
+            schema:
+              type: integer
+            required: true
+            description: The ID of the post to delete
+          - $ref: '#/components/parameters/Token'
+        responses:
+          '200':
+            description: Post deleted successfully
+          '401':
+            description: Unauthorized
+          '404':
+            description: Post not found
+  /api/search/{query}:
+      get:
+        tags:
+          - Search_Users
+        summary: Get Matching Username having users search
+        parameters:
+          - in: path
+            name: query
+            schema:
+              type: string
+            required: true
+            description: username query
+          - $ref: '#/components/parameters/Token'
+        responses:
+          '200':
+            description: The requested post
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Post'
+          '401':
+            description: Unauthorized
+          '404':
+            description: Post not found
+
+  /api/follow/{user_id}:
+      get:
+        tags:
+          - Following
+        summary: Follow a user by user ID
+        parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: The ID of the post to retrieve
+          - $ref: '#/components/parameters/Token'
+        responses:
+          '200':
+            description: Successfully followed
+          '401':
+            description: Unauthorized
+          '404':
+            description: Post not found
+      delete:
+        summary: unfollow a user by user ID
+        tags:
+          - Following
+        parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: The ID of the post to delete
+          - $ref: '#/components/parameters/Token'
+        responses:
+          '200':
+            description: unfollowed successfully
+          '401':
+            description: Unauthorized
+          '404':
+            description: Post not found
+  /api/feed:
+    description: Get feed posts for user
+    get:
+      operationId: "GetFeedPosts"
+      tags:
+        - Feed
+      parameters:
+        - $ref: '#/components/parameters/Token'
+      description: Operation to get a user details
+      responses:
+        '200':
+          description: Success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Post'
+        '404':
+          description: Resource not found.
+        '500':
+          description: Internal Server Error.
+  /api/like_post/{post_id}:
+      get:
+        tags:
+          - Like_Post
+        summary: Like a post by post ID
+        parameters:
+          - in: path
+            name: post_id
+            schema:
+              type: integer
+            required: true
+            description: The ID of the post to like
+          - $ref: '#/components/parameters/Token'
+        responses:
+          '200':
+            description: Successfully liked
+          '401':
+            description: Unauthorized
+          '404':
+            description: Post not found
+      delete:
+        summary: Unlike a post by post ID
+        tags:
+          - Like_Post
+        parameters:
+          - in: path
+            name: post_id
+            schema:
+              type: integer
+            required: true
+            description: The ID of the post to unlike
+          - $ref: '#/components/parameters/Token'
+        responses:
+          '200':
+            description: unliked successfully
+          '401':
+            description: Unauthorized
+          '404':
+            description: Post not found
+  /api/liked_posts:
+    description: Get liked posts by user
+    get:
+      operationId: "GetLikedPosts"
+      tags:
+        - Like_Post
+      parameters:
+        - $ref: '#/components/parameters/Token'
+      description: Get Liked posts of user
+      responses:
+        '200':
+          description: Success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Post'
+        '404':
+          description: Resource not found.
+        '500':
+          description: Internal Server Error.
+tags:
+  - name: Login
+    description: Gets authentication token for login
+  - name: User
+    description: Everything related to user eg. CRUD operations
+  - name: Post
+    description: Everything related to post eg. CRUD operations
+  - name: Following
+    description: Follow/unfollow a use by id
+  - name: Search_Users
+    description: Search users with username
+  - name: Feed
+    description: Feed posts for user
+  - name: Like_Post
+    description: Everything related to liking post
+  
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the post
+        title:
+          type: string
+          description: The title of the post
+        description:
+          type: string
+          description: The description of the post
+        image:
+          type: string
+          description: The URL of the image associated with the post
+  parameters:
+    Token:
+      in: header
+      name: x-access-tokens
+      required: true
+      schema:
+        type: string
+        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOjN9.c2c_4NTEvw_PIhCWAZg2jg8Dm8OkNXsRtgGRIGvpCUc
